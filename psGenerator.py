@@ -32,3 +32,5 @@ for i in range(int(count)):
 
 for key in result:
     print(str(key) + ')' + (result[key]))
+
+input('Чтобы продолжить нажмите Enter')
