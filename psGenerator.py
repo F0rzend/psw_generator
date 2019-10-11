@@ -28,4 +28,4 @@ for i in range(1, int(count) + 1):
     password = ''
 
 for key in result:
-    print(str(key) + ')' + (result[key]))
+    print(f'{key}) {result[key]}')
