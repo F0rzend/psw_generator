@@ -36,10 +36,10 @@ while not count.isdigit():
 password = ''
 result = {}
 
-for i in range(1, int(count) + 1):
+for i in range(int(count)):
     for _ in range(int(length)):
         password += random.choice(pass_list)
-    result[i] = password
+    result[i + 1] = password
     password = ''
 
 for key in result:
