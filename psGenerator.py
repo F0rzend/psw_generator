@@ -44,3 +44,18 @@ for i in range(int(count)):
 
 for key in result:
     print(f'{key}) {result[key]}')
+
+confirm = None
+while confirm != 'y':
+    while choice not in range(1, int(count) + 1):
+        choice = int(input('Введите номер пароля, который вы бы хотели использовать: '))
+    confirm = input(f'Вы собираетесь использовать пароль "{result[choice]}"? (y/n): ')
+
+
+comment = input('Пожалуйста добавьте комментарий к паролю: ')
+
+with open('passwords.txt', 'a') as f:
+    f.write(f'{result[choice]} - {comment}\n')
+
+with open('passwords.txt', 'r') as f:
+    print(f.read())
