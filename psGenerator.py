@@ -13,13 +13,16 @@ def psw_type():
             'name': 'types',
             'choices': [
                 {
-                    'name': 'Маленькие буквы'
+                    'name': 'Маленькие буквы',
+                    'checked': True
                 },
                 {
-                    'name': 'Заглавные буквы'
+                    'name': 'Заглавные буквы',
+                    'checked': True
                 },
                 {
-                    'name': 'Цифры'
+                    'name': 'Цифры',
+                    'checked': True
                 },
                 {
                     'name': 'Символы'
@@ -55,6 +58,7 @@ def length():
             'type': 'input',
             'name': 'length',
             'message': 'Какой длинны будет пароль?',
+            'default': '12',
         },
     ]
     length = prompt(questions, style=custom_style_1)
@@ -70,6 +74,7 @@ def count():
             'type': 'input',
             'name': 'count',
             'message': 'Сколько паролей создать вам для выбора?',
+            'default': '8',
         }
     ]
     count = prompt(questions, style=custom_style_1)
