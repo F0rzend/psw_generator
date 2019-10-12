@@ -1,61 +1,119 @@
 import random
 import string
 
-pass_list = tuple()
-
-choice = None
-while choice != 'y' and choice != 'n':
-    choice = input('Использовать ли маленькие буквы в пароле? (y/n): ')
-    if choice == 'y':
-        pass_list += tuple(string.ascii_lowercase)
-
-choice = input('Использовать ли большие буквы в пароле? (y/n): ')
-while choice != 'y' and choice != 'n':
-    if choice == 'y':
-        pass_list += tuple(string.ascii_uppercase)
-
-choice = input('Использовать ли цифры в пароле? (y/n): ')
-while choice != 'y' and choice != 'n':
-    if choice == 'y':
-        pass_list += tuple(string.digits)
-
-choice = input('Использовать ли символы? (y/n): ')
-while choice != 'y' and choice != 'n':
-    if choice == 'y':
-        pass_list += tuple(string.punctuation)
-
-length = ''
-while not length.isdigit():
-    length = input('Какова длинна пароля?: ')
-
-count = ''
-while not count.isdigit():
-    count = input('Сколько паролей создать вам для выбора?: ')
+from PyInquirer import prompt
+from examples import custom_style_1, custom_style_2, custom_style_3
 
 
-password = ''
-result = {}
+def psw_type():
+    questions = [
+        {
+            'type': 'checkbox',
+            'message': 'Использовать в пароле',
+            'name': 'types',
+            'choices': [
+                {
+                    'name': 'Маленькие буквы'
+                },
+                {
+                    'name': 'Заглавные буквы'
+                },
+                {
+                    'name': 'Цифры'
+                },
+                {
+                    'name': 'Символы'
+                },
 
-for i in range(int(count)):
-    for _ in range(int(length)):
-        password += random.choice(pass_list)
-    result[i + 1] = password
-    password = ''
+            ],
+        }
+    ]
+    types = prompt(questions, style=custom_style_2)
+    psw_list = tuple()
+    if 'Маленькие буквы' in types['types']:
+        psw_list += tuple(string.ascii_lowercase)
 
-for key in result:
-    print(f'{key}) {result[key]}')
+    if 'Заглавные буквы' in types['types']:
+        psw_list += tuple(string.ascii_uppercase)
 
-confirm = None
-while confirm != 'y':
-    while choice not in range(1, int(count) + 1):
-        choice = int(input('Введите номер пароля, который вы бы хотели использовать: '))
-    confirm = input(f'Вы собираетесь использовать пароль "{result[choice]}"? (y/n): ')
+    if 'Цифры' in types['types']:
+        psw_list += tuple(string.digits)
+
+    if 'Символы' in types['types']:
+        psw_list += tuple(string.punctuation)
+
+    if not psw_list:
+        return psw_type()
+
+    print()
+    return psw_list
 
 
-comment = input('Пожалуйста добавьте комментарий к паролю: ')
+def length():
+    questions = [
+        {
+            'type': 'input',
+            'name': 'length',
+            'message': 'Какой длинны будет пароль?',
+        },
+    ]
+    length = prompt(questions, style=custom_style_1)
+    if not length['length']:
+        return length()
+    else:
+        return int(length['length'])
 
-with open('passwords.txt', 'a') as f:
-    f.write(f'{result[choice]} - {comment}\n')
 
-with open('passwords.txt', 'r') as f:
-    print(f.read())
+def count():
+    questions = [
+        {
+            'type': 'input',
+            'name': 'count',
+            'message': 'Сколько паролей создать вам для выбора?',
+        }
+    ]
+    count = prompt(questions, style=custom_style_1)
+    if not count['count']:
+        return count()
+    else:
+        return int(count['count'])
+
+
+def generate(psw_list, length, count):
+    result = []
+    psw = ''
+    for i in range(count):
+        for _ in range(length):
+            psw += random.choice(psw_list)
+        result.append(psw)
+        psw = ''
+
+    return result
+
+
+def save_psw(passwords_list):
+    print(passwords_list)
+    questions = [
+        {
+            'type': 'list',
+            'name': 'psw',
+            'message': 'Какой пароль вы хотели бы использовать?',
+            'choices': passwords_list
+        }
+    ]
+
+    choice = prompt(questions, style=custom_style_3)
+    questions = [
+        {
+            'type': 'input',
+            'name': 'comment',
+            'message': f'Пожалуйста добавьте комментарий к паролю {choice["psw"]}'
+        }
+    ]
+    comment = prompt(questions, style=custom_style_1)
+    with open('passwords.txt', 'a') as f:
+        f.write(f'{choice["psw"]} - {comment["comment"]}')
+
+
+if __name__ == '__main__':
+    save_psw(generate(psw_type(), length(), count()))
