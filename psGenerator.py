@@ -1,16 +1,31 @@
 import random
 import string
+from functools import partial
 
-from PyInquirer import prompt
-from examples import custom_style_1, custom_style_2, custom_style_3
+from PyInquirer import prompt, Validator, ValidationError
+
+
+class IntNumberValidator(Validator):
+    def validate(self, document):
+        if not document.text.isdigit():
+            raise ValidationError(
+                message='Введите число 1 - 100',
+                cursor_position=len(document.text)
+            )
+        elif int(document.text) < 1:
+            raise ValidationError(
+                message='Введите число 1 - 100',
+                cursor_position=len(document.text)
+            )
 
 
 def psw_type():
     questions = [
         {
             'type': 'checkbox',
+            'qmark': '[?]',
             'message': 'Использовать в пароле',
-            'name': 'types',
+            'name': 'symbols',
             'choices': [
                 {
                     'name': 'Маленькие буквы',
@@ -31,73 +46,50 @@ def psw_type():
             ],
         }
     ]
-    types = prompt(questions, style=custom_style_2)
-    psw_list = tuple()
-    if 'Маленькие буквы' in types['types']:
-        psw_list += tuple(string.ascii_lowercase)
+    types = prompt(questions)
+    psw_list = ''
+    if 'Маленькие буквы' in types['symbols']:
+        psw_list += string.ascii_lowercase
 
-    if 'Заглавные буквы' in types['types']:
-        psw_list += tuple(string.ascii_uppercase)
+    if 'Заглавные буквы' in types['symbols']:
+        psw_list += string.ascii_uppercase
 
-    if 'Цифры' in types['types']:
-        psw_list += tuple(string.digits)
+    if 'Цифры' in types['symbols']:
+        psw_list += string.digits
 
-    if 'Символы' in types['types']:
-        psw_list += tuple(string.punctuation)
+    if 'Символы' in types['symbols']:
+        psw_list += string.punctuation
 
     if not psw_list:
+        print('Необходимо задействовать минимум один набор символов')
         return psw_type()
 
     print()
     return psw_list
 
 
-def length():
+def psw_length():
     questions = [
         {
             'type': 'input',
             'name': 'length',
             'message': 'Какой длинны будет пароль?',
             'default': '12',
+            'validate': IntNumberValidator
         },
     ]
-    length = prompt(questions, style=custom_style_1)
-    if not length['length']:
-        return length()
-    else:
-        return int(length['length'])
+
+    length = prompt(questions)
+    return int(length['length'])
 
 
-def count():
-    questions = [
-        {
-            'type': 'input',
-            'name': 'count',
-            'message': 'Сколько паролей создать вам для выбора?',
-            'default': '8',
-        }
-    ]
-    count = prompt(questions, style=custom_style_1)
-    if not count['count']:
-        return count()
-    else:
-        return int(count['count'])
-
-
-def generate(psw_list, length, count):
-    result = []
-    psw = ''
-    for i in range(count):
-        for _ in range(length):
-            psw += random.choice(psw_list)
-        result.append(psw)
-        psw = ''
-
-    return result
+def generate(symbols_list, pass_len, count=8):
+    some_symbol = partial(random.choice, symbols_list)
+    psw_list = [''.join([some_symbol() for _ in range(pass_len)]) for _ in range(count)]
+    return psw_list
 
 
 def save_psw(passwords_list):
-    print(passwords_list)
     questions = [
         {
             'type': 'list',
@@ -107,7 +99,7 @@ def save_psw(passwords_list):
         }
     ]
 
-    choice = prompt(questions, style=custom_style_3)
+    choice = prompt(questions)
     questions = [
         {
             'type': 'input',
@@ -115,10 +107,30 @@ def save_psw(passwords_list):
             'message': f'Пожалуйста добавьте комментарий к паролю {choice["psw"]}'
         }
     ]
-    comment = prompt(questions, style=custom_style_1)
-    with open('passwords.txt', 'a') as f:
-        f.write(f'{choice["psw"]} - {comment["comment"]}')
+    comment = prompt(questions)
+
+    questions = [
+        {
+            'type': 'list',
+            'name': 'confirm',
+            'message': f'Пароль {choice["psw"]} будет сохранён в файле "passwords.txt"',
+            'choices': [
+                {
+                    'name': 'YES'
+                },
+                {
+                    'name': 'NO'
+                },
+            ]
+        }
+    ]
+    confirm = prompt(questions)
+    if confirm['confirm'] == 'YES':
+        with open('passwords.txt', 'a') as f:
+            f.write(f'{choice["psw"]} - {comment["comment"]}')
+        print('Сохранено!')
 
 
 if __name__ == '__main__':
-    save_psw(generate(psw_type(), length(), count()))
+    save_psw(generate(psw_type(), psw_length()))
+    input('Нажмите Enter чтобы продолжить...')
