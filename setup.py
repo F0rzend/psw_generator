@@ -12,7 +12,7 @@ setup(
     install_requires=open('requirements.txt').read().split(),
     entry_points={
         'console_scripts': [
-            'passgen = password_generator.passgen:entrypoint',
+            'passgen = psw_Generator.passgen:entrypoint',
         ],
     },
 )
