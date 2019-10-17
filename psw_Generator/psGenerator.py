@@ -131,6 +131,10 @@ def save_psw(passwords_list):
         print('Сохранено!')
 
 
-if __name__ == '__main__':
+def main():
     save_psw(generate(psw_type(), psw_length()))
     input('Нажмите Enter чтобы продолжить...')
+
+
+if __name__ == '__main__':
+    main()
